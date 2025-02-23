@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Couple Adventure Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    #history {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 10px;
+    }
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #wheel {
+      width: 200px;
+      height: 200px;
+      animation: spin 2s linear infinite;
+    }
+    .rating span {
+      cursor: pointer;
+      font-size: 24px;
+      color: #ccc;
+    }
+    .rating span.active {
+      color: #ffcc00;
+    }
+    .hidden {
+      display: none;
+    }
+    .couple-section {
+      margin-bottom: 20px;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .calendar div {
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    /* Mini-game containers */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .memory-card {
+      width: 80px;
+      height: 80px;
+      background: #4CAF50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      border-radius: 10px;
+      color: white;
+    }
+    .trivia-question {
+      background: #e0f7fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+    .tic-tac-toe {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      width: 240px;
+      margin: 10px 0;
+    }
+    .cell {
+      width: 80px;
+      height: 80px;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+    }
+    .love-meter {
+      width: 200px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .love-fill {
+      height: 100%;
+      background: #ff4081;
+      transition: width 1s;
+    }
+  </style>
+</head>
+<body>
+  <h1>Couple Adventure Game</h1>
+
+  <!-- MULTIPLE COUPLES SECTION -->
+  <div class="couple-section">
+    <h3>Select or Create Couple:</h3>
+    <input type="text" id="coupleName" placeholder="Couple Name">
+    <button onclick="loadCouple()">Load Couple</button>
+    <button onclick="newCouple()">New Couple</button>
+  </div>
+
+  <!-- NAMES SECTION -->
+  <div>
+    <input type="text" id="name1" placeholder="Your Name">
+    <input type="text" id="name2" placeholder="Partner's Name">
+  </div>
+
+  <!-- ACTIVITIES SECTION -->
+  <div>
+    <h3>Add Activities:</h3>
+    <input type="text" id="activityInput" placeholder="Type activity">
+    <select id="category">
+      <option value="outdoor">Outdoor</option>
+      <option value="indoor">Indoor</option>
+      <option value="romantic">Romantic</option>
+    </select>
+    <input type="number" id="timer" placeholder="Timer (minutes)">
+    <input type="date" id="activityDate">
+    <button onclick="addActivity()">Add Activity</button>
+    <ul id="activityList"></ul>
+  </div>
+
+  <!-- GAMES SECTION (Spin Wheel, RPS) -->
+  <div>
+    <button onclick="spinWheel()">🎡 Spin Wheel</button>
+    <button onclick="playRPS()">✊✋✌️ RPS Game</button>
+  </div>
+
+  <!-- WHEEL ANIMATION -->
+  <div id="wheelContainer">
+    <img id="wheel" src="https://i.imgur.com/7QZQZQZ.png" alt="Wheel">
+  </div>
+
+  <!-- HISTORY SECTION -->
+  <div id="history">
+    <h3>Completed Activities</h3>
+    <ul id="historyList"></ul>
+  </div>
+
+  <!-- RATING SECTION -->
+  <div id="ratingSection" class="hidden">
+    <h3>Rate This Activity:</h3>
+    <div class="rating">
+      <span onclick="rateActivity(1)">⭐</span>
+      <span onclick="rateActivity(2)">⭐</span>
+      <span onclick="rateActivity(3)">⭐</span>
+      <span onclick="rateActivity(4)">⭐</span>
+      <span onclick="rateActivity(5)">⭐</span>
+    </div>
+  </div>
+
+  <!-- CALENDAR SECTION -->
+  <div id="calendarSection">
+    <h3>Activity Calendar</h3>
+    <div class="calendar" id="calendar"></div>
+  </div>
+
+  <!-- SHAREABLE LINK SECTION -->
+  <div>
+    <h3>Share Your List:</h3>
+    <button onclick="generateLink()">Generate Shareable Link</button>
+    <p id="shareLink"></p>
+  </div>
+
+  <!-- GAMIFICATION SECTION -->
+  <div>
+    <h3>Points: <span id="points">0</span></h3>
+  </div>
+
+  <!-- MORE GAMES SECTION -->
+  <div style="margin: 20px 0;">
+    <h3>Other Mini-Games:</h3>
+    <button onclick="startTrivia()">🎲 Trivia Challenge</button>
+    <button onclick="startMemoryGame()">🧠 Memory Game</button>
+    <button onclick="startCoupleQuiz()">💑 Couple Quiz</button>
+    <button onclick="startTicTacToe()">❌⭕ Tic-Tac-Toe</button>
+    <button onclick="measureLove()">💖 Love Meter</button>
+  </div>
+
+  <!-- MINI-GAME CONTAINERS (Initially Hidden) -->
+  <div id="triviaContainer" class="hidden"></div>
+  <div id="memoryContainer" class="hidden"></div>
+  <div id="quizContainer" class="hidden"></div>
+  <div id="ticTacToeContainer" class="hidden"></div>
+  <div id="loveMeterContainer" class="hidden">
+    <div class="love-meter">
+      <div class="love-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <script>
+    // ======================
+    // COUPLE & ACTIVITIES
+    // ======================
+    let activities = [];
+    let currentActivity = null;
+    let currentCouple = null;
+    let points = 0;
+
+    function newCouple() {
+      const coupleName = document.getElementById('coupleName').value;
+      if (coupleName) {
+        currentCouple = coupleName;
+        activities = [];
+        document.getElementById('historyList').innerHTML = '';
+        points = 0;
+        updatePoints();
+        updateList();
+        saveData();
+        alert(`New couple "${coupleName}" created!`);
+      }
+    }
+
+    function loadCouple() {
+      const coupleName = document.getElementById('coupleName').value;
+      if (coupleName) {
+        const data = localStorage.getItem(`couple_${coupleName}`);
+        if (data) {
+          const savedData = JSON.parse(data);
+          activities = savedData.activities;
+          currentCouple = coupleName;
+          document.getElementById('historyList').innerHTML = savedData.history;
+          points = savedData.points || 0;
+          updatePoints();
+          updateList();
+          alert(`Couple "${coupleName}" loaded!`);
+        } else {
+          alert(`Couple "${coupleName}" not found!`);
+        }
+      }
+    }
+
+    function addActivity() {
+      const input = document.getElementById('activityInput');
+      const category = document.getElementById('category').value;
+      const timer = document.getElementById('timer').value;
+      const date = document.getElementById('activityDate').value;
+
+      if (input.value.trim()) {
+        activities.push({
+          name: input.value.trim(),
+          category: category,
+          timer: timer || 0,
+          date: date || null,
+          rating: 0
+        });
+        input.value = '';
+        updateList();
+        saveData();
+        updateCalendar();
+      }
+    }
+
+    function updateList() {
+      const list = document.getElementById('activityList');
+      list.innerHTML = activities.map(a => `
+        <li>
+          ${a.name} (${a.category})
+          ${a.timer > 0 ? `⏱️ ${a.timer} mins` : ''}
+          ${a.date ? `📅 ${a.date}` : ''}
+        </li>
+      `).join('');
+    }
+
+    function addToHistory(activity) {
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML += `
+        <li>
+          ${activity.name} (${activity.category})
+          ${activity.timer > 0 ? `⏱️ ${activity.timer} mins` : ''}
+          ${activity.date ? `📅 ${activity.date}` : ''}
+        </li>
+      `;
+      currentActivity = activity;
+      showRatingSection();
+    }
+
+    function showRatingSection() {
+      document.getElementById('ratingSection').classList.remove('hidden');
+    }
+
+    function rateActivity(stars) {
+      currentActivity.rating = stars;
+      alert(`You rated "${currentActivity.name}" ${stars} stars!`);
+      saveData();
+      document.getElementById('ratingSection').classList.add('hidden');
+    }
+
+    function spinWheel() {
+      const wheel = document.getElementById('wheel');
+      wheel.style.animation = 'spin 2s ease-out';
+
+      setTimeout(() => {
+        if (activities.length === 0) {
+          alert("Add activities first!");
+          wheel.style.animation = '';
+          return;
+        }
+        const randomIndex = Math.floor(Math.random() * activities.length);
+        const selected = activities[randomIndex];
+        alert(`Selected: ${selected.name}`);
+        activities = activities.filter(a => a !== selected);
+        updateList();
+        addToHistory(selected);
+        startTimer(selected.timer);
+        addPoints(10);
+        saveData();
+        wheel.style.animation = '';
+      }, 2000);
+    }
+
+    function playRPS() {
+      const choices = ['rock','paper','scissors'];
+      const userChoice = prompt("Rock, paper, or scissors?").toLowerCase();
+      if(!userChoice || !choices.includes(userChoice)) {
+        alert("Invalid choice or canceled.");
+        return;
+      }
+      const computerChoice = choices[Math.floor(Math.random() * 3)];
+      if (userChoice === computerChoice) {
+        alert("Tie! Try again");
+      } else if (
+        (userChoice === 'rock' && computerChoice === 'scissors') ||
+        (userChoice === 'paper' && computerChoice === 'rock') ||
+        (userChoice === 'scissors' && computerChoice === 'paper')
+      ) {
+        if (activities.length > 0) {
+          const selected = activities.shift();
+          alert(`You win! Do: ${selected.name}`);
+          updateList();
+          addToHistory(selected);
+          startTimer(selected.timer);
+          addPoints(20);
+          saveData();
+        } else {
+          alert("You win, but no activities left!");
+        }
+      } else {
+        alert(`Computer chose ${computerChoice}. You lose!`);
+      }
+    }
+
+    function startTimer(minutes) {
+      if (minutes > 0) {
+        const endTime = Date.now() + minutes * 60000;
+        const timerInterval = setInterval(() => {
+          const timeLeft = Math.round((endTime - Date.now()) / 1000);
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            alert("Time's up!");
+          }
+        }, 1000);
+      }
+    }
+
+    // ----------------------
+    // SAVE/LOAD
+    // ----------------------
+    function saveData() {
+      if (currentCouple) {
+        localStorage.setItem(`couple_${currentCouple}`, JSON.stringify({
+          activities: activities,
+          history: document.getElementById('historyList').innerHTML,
+          points: points
+        }));
+      }
+    }
+
+    function loadData() {
+      if (currentCouple) {
+        const data = localStorage.getItem(`couple_${currentCouple}`);
+        if (data) {
+          const savedData = JSON.parse(data);
+          activities = savedData.activities;
+          document.getElementById('historyList').innerHTML = savedData.history;
+          points = savedData.points || 0;
+          updatePoints();
+          updateList();
+        }
+      }
+    }
+
+    // ----------------------
+    // CALENDAR
+    // ----------------------
+    function updateCalendar() {
+      const calendar = document.getElementById('calendar');
+      if (!calendar) return;
+      calendar.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const day = document.createElement('div');
+        day.textContent = `Day ${i + 1}`;
+        calendar.appendChild(day);
+      }
+    }
+
+    // ----------------------
+    // SHAREABLE LINK
+    // ----------------------
+    function generateLink() {
+      if (!currentCouple) {
+        alert("Please create or load a couple first.");
+        return;
+      }
+      const link = `${window.location.href}?couple=${encodeURIComponent(currentCouple)}`;
+      document.getElementById('shareLink').textContent = link;
+    }
+
+    // ----------------------
+    // GAMIFICATION
+    // ----------------------
+    function addPoints(amount) {
+      points += amount;
+      updatePoints();
+    }
+    function updatePoints() {
+      document.getElementById('points').textContent = points;
+    }
+
+    // ----------------------
+    // MINI-GAMES
+    // ----------------------
+    function hideAllMiniGames() {
+      document.getElementById('triviaContainer').classList.add('hidden');
+      document.getElementById('memoryContainer').classList.add('hidden');
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('ticTacToeContainer').classList.add('hidden');
+      document.getElementById('loveMeterContainer').classList.add('hidden');
+    }
+
+    // Trivia
+    function startTrivia() {
+      hideAllMiniGames();
+      document.getElementById('triviaContainer').classList.remove('hidden');
+
+      const questionText = "Which planet is known as the Red Planet?";
+      const correctAnswer = "Mars";
+      const answers = ["Mars", "Jupiter", "Venus", "Saturn"];
+      let html = `
+        <div class="trivia-question">
+          <h4>${questionText}</h4>
+          ${answers.map(ans => `
+            <button onclick="checkTriviaAnswer('${ans}','${correctAnswer}')">${ans}</button>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('triviaContainer').innerHTML = html;
+    }
+
+    function checkTriviaAnswer(selected, correct) {
+      if(selected === correct) {
+        alert("Correct! You win!");
+        addPoints(15);
+      } else {
+        alert(`Wrong! Correct answer: ${correct}`);
+      }
+      document.getElementById('triviaContainer').classList.add('hidden');
+    }
+
+    // Memory
+    let flippedCards = [];
+    function startMemoryGame() {
+      hideAllMiniGames();
+      document.getElementById('memoryContainer').classList.remove('hidden');
+
+      const symbols = ['🎨','🎮','🎲','🎸','🎭','🎪','🎯','🎱'];
+      const cards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+      const html = `
+        <div class="memory-grid">
+          ${cards.map(symbol => `
+            <div class="memory-card" onclick="flipCard(this, '${symbol}')">❓</div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('memoryContainer').innerHTML = html;
+    }
+
+    function flipCard(card, symbol) {
+      if(card.textContent === '❓' && flippedCards.length < 2) {
+        card.textContent = symbol;
+        flippedCards.push({card, symbol});
+        if(flippedCards.length === 2) {
+          setTimeout(() => {
+            if(flippedCards[0].symbol === flippedCards[1].symbol) {
+              flippedCards.forEach(c => c.card.style.background = '#ff4081');
+              addPoints(20);
+            } else {
+              flippedCards.forEach(c => c.card.textContent = '❓');
+            }
+            flippedCards = [];
+          }, 800);
+        }
+      }
+    }
+
+    // Couple Quiz
+    function startCoupleQuiz() {
+      hideAllMiniGames();
+      document.getElementById('quizContainer').classList.remove('hidden');
+
+      const question = "What's your partner's favorite color?";
+      const answers = ['Red','Blue','Green','Yellow'];
+      let html = `
+        <div class="trivia-question">
+          <h4>${question}</h4>
+          ${answers.map(ans => `
+            <button onclick="checkQuizAnswer('${ans}')">${ans}</button>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('quizContainer').innerHTML = html;
+    }
+
+    function checkQuizAnswer(answer) {
+      const correct = prompt("Partner! Is this correct? (yes/no)").toLowerCase();
+      if (correct === 'yes') {
+        alert("Correct! You know each other well!");
+        addPoints(25);
+      } else {
+        alert("Oops! Better communicate more!");
+      }
+      document.getElementById('quizContainer').classList.add('hidden');
+    }
+
+    // Tic-Tac-Toe
+    let currentPlayerTTT = '❌';
+    function startTicTacToe() {
+      hideAllMiniGames();
+      document.getElementById('ticTacToeContainer').classList.remove('hidden');
+      currentPlayerTTT = '❌';
+      const html = `
+        <div class="tic-tac-toe">
+          ${Array(9).fill().map((_, i) => `
+            <div class="cell" onclick="makeMoveTTT(${i}, this)"></div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('ticTacToeContainer').innerHTML = html;
+    }
+
+    function makeMoveTTT(index, cell) {
+      if(!cell.textContent) {
+        cell.textContent = currentPlayerTTT;
+        currentPlayerTTT = (currentPlayerTTT === '❌') ? '⭕' : '❌';
+        // winner detection can be added
+      }
+    }
+
+    // Love Meter
+    function measureLove() {
+      hideAllMiniGames();
+      document.getElementById('loveMeterContainer').classList.remove('hidden');
+      const meter = document.querySelector('.love-fill');
+      meter.style.width = "0%";
+      setTimeout(() => {
+        const randomVal = Math.random() * 100;
+        meter.style.width = `${randomVal}%`;
+        setTimeout(() => {
+          alert(`Your love compatibility is ${Math.round(randomVal)}%!`);
+        }, 1200);
+      }, 200);
+    }
+
+    // Hide all mini-games on load
+    function hideAllGameContainers() {
+      hideAllMiniGames();
+      document.getElementById('ratingSection').classList.add('hidden');
+    }
+
+    // POINTS
+    function updatePoints() {
+      document.getElementById('points').textContent = points;
+    }
+
+    // On page load, check for ?couple= param
+    window.addEventListener('load', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const couple = urlParams.get('couple');
+      if (couple) {
+        document.getElementById('coupleName').value = couple;
+        loadCouple();
+      }
+    });
+    window.addEventListener('beforeunload', saveData);
+  </script>
+</body>
+</html>
